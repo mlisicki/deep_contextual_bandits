@@ -1,5 +1,7 @@
 # Deep Bayesian Bandits Library
 
+This is a pratial fork of the repo posted by Carlos Riquelme https://github.com/rikel/models/tree/master/research/deep_contextual_bandits
+
 This library corresponds to the *[Deep Bayesian Bandits Showdown: An Empirical
 Comparison of Bayesian Deep Networks for Thompson
 Sampling](https://arxiv.org/abs/1802.09127)* paper, published in
