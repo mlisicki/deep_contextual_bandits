@@ -90,9 +90,9 @@ def main(_):
     opts = get_options()
     print("Parameters: {}".format(opts))
     address = ('localhost', opts.ipc_port)  # family is deduced to be 'AF_INET'
-    listener = Listener(address, authkey=b'dcb')
+    listener = Listener(address, authkey=b'bandit')
     conn = listener.accept()
-    multiprocessing.current_process().authkey = b'dcb'
+    multiprocessing.current_process().authkey = b'bandit'
     print('connection accepted from', listener.last_accepted)
 
 
