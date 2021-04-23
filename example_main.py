@@ -53,7 +53,7 @@ from bandits.algorithms.uniform_sampling import UniformSampling
 
 # Set up your file routes to the data files.
 base_route = os.getcwd()
-data_route = 'contextual_bandits/datasets'
+data_route = 'datasets'
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('alsologtostderr', True)
