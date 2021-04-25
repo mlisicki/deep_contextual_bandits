@@ -12,6 +12,7 @@ from absl import app
 from absl import flags
 FLAGS = flags.FLAGS
 FLAGS.set_default('alsologtostderr', True)
+#flags.DEFINE_bool('undefok', True,'_')
 flags.DEFINE_string('logdir', '../../outputs', 'Base directory to save output')
 
 class IPCBandit(object):
@@ -139,4 +140,12 @@ def main(_):
     listener.close()
 
 if __name__ == '__main__':
+    # This is to ignore the error from abs flags when used in conjunction with argparse
+    if len(sys.argv)>1:
+        args = sys.argv[1:]
+    else:
+        args = []
+    sys.argv = [sys.argv[0]]+['--']+args
+
+    # Run the main script
     app.run(main)

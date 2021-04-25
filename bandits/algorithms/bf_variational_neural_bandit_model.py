@@ -271,7 +271,9 @@ class BfVariationalNeuralBanditModel(BayesianNN):
     self.graph = tf.Graph()
     with self.graph.as_default():
 
-      self.sess = tf.Session()
+      config = tf.ConfigProto()
+      config.gpu_options.allow_growth = True
+      self.sess = tf.Session(config=config)
 
       self.n = tf.placeholder(shape=[], dtype=tf.float32)
 
