@@ -6,7 +6,14 @@ import multiprocessing
 from multiprocessing.connection import Listener
 import tensorflow as tf
 
+from bandits.algorithms.bootstrapped_bnn_sampling import BootstrappedBNNSampling
 from bandits.algorithms.neural_linear_sampling import NeuralLinearPosteriorSampling
+from bandits.algorithms.fixed_policy_sampling import FixedPolicySampling
+from bandits.algorithms.linear_full_posterior_sampling import LinearFullPosteriorSampling
+from bandits.algorithms.neural_linear_sampling import NeuralLinearPosteriorSampling
+from bandits.algorithms.parameter_noise_sampling import ParameterNoiseSampling
+from bandits.algorithms.posterior_bnn_sampling import PosteriorBNNSampling
+from bandits.algorithms.uniform_sampling import UniformSampling
 
 from absl import app
 from absl import flags
@@ -87,7 +94,7 @@ def get_options(args=None):
 
     return opts
 
-def main(_):
+def main(argv):
     opts = get_options()
     print("Parameters: {}".format(opts))
     address = ('localhost', opts.ipc_port)  # family is deduced to be 'AF_INET'
@@ -100,30 +107,239 @@ def main(_):
     # Create contextual bandit
     bandit = IPCBandit(conn)
 
-    policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
-                                                    context_dim=bandit.context_dim,
-                                                    init_scale=0.3,
-                                                    activation=tf.nn.relu,
-                                                    layer_sizes=[50],
-                                                    batch_size=512,
-                                                    activate_decay=True,
-                                                    initial_lr=0.1,
-                                                    max_grad_norm=5.0,
-                                                    show_training=False,
-                                                    freq_summary=1000,
-                                                    buffer_s=-1,
-                                                    initial_pulls=2,
-                                                    reset_lr=True,
-                                                    lr_decay_rate=0.5,
-                                                    training_freq=1,
-                                                    training_freq_network=50,
-                                                    training_epochs=100,
-                                                    a0=6,
-                                                    b0=6,
-                                                    lambda_prior=0.25)
+    if opts.algorithm == "uniform":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions)
+        policy = UniformSampling('Uniform Sampling', policy_parameters)
 
-    policy = NeuralLinearPosteriorSampling('NeuralLinear', policy_parameters)
+    elif opts.algorithm == "linear":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                     context_dim=bandit.context_dim,
+                                                     a0=6,
+                                                     b0=6,
+                                                     lambda_prior=0.25,
+                                                     initial_pulls=2)
+        policy = LinearFullPosteriorSampling('LinFullPost', policy_parameters)
 
+    elif opts.algorithm == "rms":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                  context_dim=bandit.context_dim,
+                                                  init_scale=0.3,
+                                                  activation=tf.nn.relu,
+                                                  layer_sizes=[50],
+                                                  batch_size=512,
+                                                  activate_decay=True,
+                                                  initial_lr=0.1,
+                                                  max_grad_norm=5.0,
+                                                  show_training=False,
+                                                  freq_summary=1000,
+                                                  buffer_s=-1,
+                                                  initial_pulls=2,
+                                                  optimizer='RMS',
+                                                  reset_lr=True,
+                                                  lr_decay_rate=0.5,
+                                                  training_freq=50,
+                                                  training_epochs=100,
+                                                  p=0.95,
+                                                  q=3)
+        policy = PosteriorBNNSampling('RMS', policy_parameters, 'RMSProp')
+
+    elif opts.algorithm == "bootrms":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                  context_dim=bandit.context_dim,
+                                                  init_scale=0.3,
+                                                  activation=tf.nn.relu,
+                                                  layer_sizes=[50],
+                                                  batch_size=512,
+                                                  activate_decay=True,
+                                                  initial_lr=0.1,
+                                                  max_grad_norm=5.0,
+                                                  show_training=False,
+                                                  freq_summary=1000,
+                                                  buffer_s=-1,
+                                                  initial_pulls=2,
+                                                  optimizer='RMS',
+                                                  reset_lr=True,
+                                                  lr_decay_rate=0.5,
+                                                  training_freq=50,
+                                                  training_epochs=100,
+                                                  p=0.95,
+                                                  q=3)
+        policy =BootstrappedBNNSampling('BootRMS', policy_parameters)
+
+    elif opts.algorithm == "dropout":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                      context_dim=bandit.context_dim,
+                                                      init_scale=0.3,
+                                                      activation=tf.nn.relu,
+                                                      layer_sizes=[50],
+                                                      batch_size=512,
+                                                      activate_decay=True,
+                                                      initial_lr=0.1,
+                                                      max_grad_norm=5.0,
+                                                      show_training=False,
+                                                      freq_summary=1000,
+                                                      buffer_s=-1,
+                                                      initial_pulls=2,
+                                                      optimizer='RMS',
+                                                      reset_lr=True,
+                                                      lr_decay_rate=0.5,
+                                                      training_freq=50,
+                                                      training_epochs=100,
+                                                      use_dropout=True,
+                                                      keep_prob=0.80)
+        policy = PosteriorBNNSampling('Dropout', policy_parameters, 'RMSProp')
+
+    elif opts.algorithm == "bbb":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                  context_dim=bandit.context_dim,
+                                                  init_scale=0.3,
+                                                  activation=tf.nn.relu,
+                                                  layer_sizes=[50],
+                                                  batch_size=512,
+                                                  activate_decay=True,
+                                                  initial_lr=0.1,
+                                                  max_grad_norm=5.0,
+                                                  show_training=False,
+                                                  freq_summary=1000,
+                                                  buffer_s=-1,
+                                                  initial_pulls=2,
+                                                  optimizer='RMS',
+                                                  use_sigma_exp_transform=True,
+                                                  cleared_times_trained=10,
+                                                  initial_training_steps=100,
+                                                  noise_sigma=0.1,
+                                                  reset_lr=False,
+                                                  training_freq=50,
+                                                  training_epochs=100)
+        policy = PosteriorBNNSampling('BBB', policy_parameters, 'Variational')
+
+    elif opts.algorithm == "neurallinear":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                      context_dim=bandit.context_dim,
+                                                      init_scale=0.3,
+                                                      activation=tf.nn.relu,
+                                                      layer_sizes=[50],
+                                                      batch_size=512,
+                                                      activate_decay=True,
+                                                      initial_lr=0.1,
+                                                      max_grad_norm=5.0,
+                                                      show_training=False,
+                                                      freq_summary=1000,
+                                                      buffer_s=-1,
+                                                      initial_pulls=2,
+                                                      reset_lr=True,
+                                                      lr_decay_rate=0.5,
+                                                      training_freq=1,
+                                                      training_freq_network=50,
+                                                      training_epochs=100,
+                                                      a0=6,
+                                                      b0=6,
+                                                      lambda_prior=0.25)
+        policy = NeuralLinearPosteriorSampling('NeuralLinear', policy_parameters)
+
+    elif opts.algorithm == "neurallinear2":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                       context_dim=bandit.context_dim,
+                                                       init_scale=0.3,
+                                                       activation=tf.nn.relu,
+                                                       layer_sizes=[50],
+                                                       batch_size=512,
+                                                       activate_decay=True,
+                                                       initial_lr=0.1,
+                                                       max_grad_norm=5.0,
+                                                       show_training=False,
+                                                       freq_summary=1000,
+                                                       buffer_s=-1,
+                                                       initial_pulls=2,
+                                                       reset_lr=True,
+                                                       lr_decay_rate=0.5,
+                                                       training_freq=10,
+                                                       training_freq_network=50,
+                                                       training_epochs=100,
+                                                       a0=6,
+                                                       b0=6,
+                                                       lambda_prior=0.25)
+        policy = NeuralLinearPosteriorSampling('NeuralLinear2', policy_parameters)
+
+    elif opts.algorithm == "pnoise":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                     context_dim=bandit.context_dim,
+                                                     init_scale=0.3,
+                                                     activation=tf.nn.relu,
+                                                     layer_sizes=[50],
+                                                     batch_size=512,
+                                                     activate_decay=True,
+                                                     initial_lr=0.1,
+                                                     max_grad_norm=5.0,
+                                                     show_training=False,
+                                                     freq_summary=1000,
+                                                     buffer_s=-1,
+                                                     initial_pulls=2,
+                                                     optimizer='RMS',
+                                                     reset_lr=True,
+                                                     lr_decay_rate=0.5,
+                                                     training_freq=50,
+                                                     training_epochs=100,
+                                                     noise_std=0.05,
+                                                     eps=0.1,
+                                                     d_samples=300,
+                                                     )
+        policy = ParameterNoiseSampling('ParamNoise', policy_parameters)
+
+    elif opts.algorithm == "alpha_div":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                        context_dim=bandit.context_dim,
+                                                        init_scale=0.3,
+                                                        activation=tf.nn.relu,
+                                                        layer_sizes=[50],
+                                                        batch_size=512,
+                                                        activate_decay=True,
+                                                        initial_lr=0.1,
+                                                        max_grad_norm=5.0,
+                                                        show_training=False,
+                                                        freq_summary=1000,
+                                                        buffer_s=-1,
+                                                        initial_pulls=2,
+                                                        optimizer='RMS',
+                                                        use_sigma_exp_transform=True,
+                                                        cleared_times_trained=10,
+                                                        initial_training_steps=100,
+                                                        noise_sigma=0.1,
+                                                        reset_lr=False,
+                                                        training_freq=50,
+                                                        training_epochs=100,
+                                                        alpha=1.0,
+                                                        k=20,
+                                                        prior_variance=0.1)
+        policy = PosteriorBNNSampling('BBAlphaDiv', policy_parameters, 'AlphaDiv')
+
+    elif opts.algorithm == "gp":
+        policy_parameters = tf.contrib.training.HParams(num_actions=bandit.num_actions,
+                                                        num_outputs=bandit.num_actions,
+                                                        context_dim=bandit.context_dim,
+                                                        reset_lr=False,
+                                                        learn_embeddings=True,
+                                                        max_num_points=1000,
+                                                        show_training=False,
+                                                        freq_summary=1000,
+                                                        batch_size=512,
+                                                        keep_fixed_after_max_obs=True,
+                                                        training_freq=50,
+                                                        initial_pulls=2,
+                                                        training_epochs=100,
+                                                        lr=0.01,
+                                                        buffer_s=-1,
+                                                        initial_lr=0.001,
+                                                        lr_decay_rate=0.0,
+                                                        optimizer='RMS',
+                                                        task_latent_dim=5,
+                                                        activate_decay=False)
+        policy = PosteriorBNNSampling('MultitaskGP', policy_parameters, 'GP')
+
+    else:
+        raise Exception("Misspecified bandit algorithm.")
+
+    print(policy)
     # Run the contextual bandit process
     while True:
         context = bandit.context()
@@ -140,12 +356,5 @@ def main(_):
     listener.close()
 
 if __name__ == '__main__':
-    # This is to ignore the error from abs flags when used in conjunction with argparse
-    if len(sys.argv)>1:
-        args = sys.argv[1:]
-    else:
-        args = []
-    sys.argv = [sys.argv[0]]+['--undefok']+args
-
     # Run the main script
-    app.run(main)
+    app.run(main, argv=[sys.argv[0]])
