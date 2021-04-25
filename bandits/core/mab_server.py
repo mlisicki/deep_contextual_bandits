@@ -145,7 +145,7 @@ if __name__ == '__main__':
         args = sys.argv[1:]
     else:
         args = []
-    sys.argv = [sys.argv[0]]+['--']+args
+    sys.argv = [sys.argv[0]]+['--undefok']+args
 
     # Run the main script
     app.run(main)
