@@ -229,7 +229,7 @@ def sample_adult_data(file_name, num_contexts, shuffle_rows=True,
     df = df.sample(frac=1)
   df = df.iloc[:num_contexts, :]
 
-  labels = df[6].astype('category').cat.codes.as_matrix()
+  labels = df[6].astype('category').cat.codes.to_numpy()
   df = df.drop([6], axis=1)
 
   # Convert categorical variables to 1 hot encoding
@@ -238,7 +238,7 @@ def sample_adult_data(file_name, num_contexts, shuffle_rows=True,
 
   if remove_underrepresented:
     df, labels = remove_underrepresented_classes(df, labels)
-  contexts = df.as_matrix()
+  contexts = df.to_numpy()
 
   return classification_to_bandit_problem(contexts, labels, num_actions)
 
@@ -278,7 +278,7 @@ def sample_census_data(file_name, num_contexts, shuffle_rows=True,
   df = df.iloc[:num_contexts, :]
 
   # Assuming what the paper calls response variable is the label?
-  labels = df['dOccup'].astype('category').cat.codes.as_matrix()
+  labels = df['dOccup'].astype('category').cat.codes.to_numpy()
   # In addition to label, also drop the (unique?) key.
   df = df.drop(['dOccup', 'caseid'], axis=1)
 
@@ -287,7 +287,7 @@ def sample_census_data(file_name, num_contexts, shuffle_rows=True,
 
   if remove_underrepresented:
     df, labels = remove_underrepresented_classes(df, labels)
-  contexts = df.as_matrix()
+  contexts = df.to_numpy()
 
   return classification_to_bandit_problem(contexts, labels, num_actions)
 
@@ -324,13 +324,13 @@ def sample_covertype_data(file_name, num_contexts, shuffle_rows=True,
 
   # Assuming what the paper calls response variable is the label?
   # Last column is label.
-  labels = df[df.columns[-1]].astype('category').cat.codes.as_matrix()
+  labels = df[df.columns[-1]].astype('category').cat.codes.to_numpy()
   df = df.drop([df.columns[-1]], axis=1)
 
   # All columns are either quantitative or already converted to 1 hot.
   if remove_underrepresented:
     df, labels = remove_underrepresented_classes(df, labels)
-  contexts = df.as_matrix()
+  contexts = df.to_numpy()
 
   return classification_to_bandit_problem(contexts, labels, num_actions)
 
