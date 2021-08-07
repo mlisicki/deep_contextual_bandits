@@ -26,6 +26,7 @@ from __future__ import division
 from __future__ import print_function
 
 import time
+import pickle as pkl
 from absl import app
 from absl import flags
 import numpy as np
@@ -449,8 +450,10 @@ def main(_):
       # Run contextual bandit problem
       t_init = time.time()
       results = run_contextual_bandit(context_dim, num_actions, dataset, algos)
-      _, h_rewards = results
+      h_actions, h_rewards = results
 
+      pkl.dump({'models': [alg.name for alg in algos], 'dataset': data_type, 'hparams': [alg.hparams for alg in algos],
+                'actions': h_actions, 'rewards': h_rewards}, open("experiment.pkl", "wb"))
       # Display results
       display_results(algos, opt_rewards, opt_actions, h_rewards, t_init, data_type)
 
