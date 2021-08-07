@@ -228,7 +228,7 @@ def display_results(algos, opt_rewards, opt_actions, h_rewards, t_init, name):
 
 def main(_):
     # Problem parameters
-    num_contexts = 100
+    num_contexts = 200000
 
     # Data type in {linear, sparse_linear, mushroom, financial, jester,
     #                 statlog, adult, covertype, census, wheel}
