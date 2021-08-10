@@ -450,7 +450,7 @@ def main(_):
         algos = [
             PosteriorBNNSampling('BBAlphaDiv', hparams_alpha_div, 'AlphaDiv'),
             PosteriorBNNSampling('BBB', hparams_bbb, 'Variational'),
-            BootstrappedBNNSampling('BootRMS', hparams_rms),
+            BootstrappedBNNSampling('BootRMS', hparams_bootrms),
             PosteriorBNNSampling('Dropout', hparams_dropout, 'RMSProp'),
             PosteriorBNNSampling('MultitaskGP', hparams_gp, 'GP'),
             NeuralLinearPosteriorSampling('NeuralLinear', hparams_nlinear),
