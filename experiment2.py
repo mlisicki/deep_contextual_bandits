@@ -228,7 +228,7 @@ def display_results(algos, opt_rewards, opt_actions, h_rewards, t_init, name):
 
 def main(_):
     # Problem parameters
-    num_contexts = 200000
+    num_contexts = 40
     token = np.random.randint(9999)
 
     # Data type in {linear, sparse_linear, mushroom, financial, jester,
@@ -448,8 +448,8 @@ def main(_):
 
 
         algos = [
-            PosteriorBNNSampling('BBAlphaDiv', hparams_alpha_div, 'AlphaDiv'),
-            PosteriorBNNSampling('BBB', hparams_bbb, 'Variational'),
+            #PosteriorBNNSampling('BBAlphaDiv', hparams_alpha_div, 'AlphaDiv'),
+            #PosteriorBNNSampling('BBB', hparams_bbb, 'Variational'),
             BootstrappedBNNSampling('BootRMS', hparams_bootrms),
             PosteriorBNNSampling('Dropout', hparams_dropout, 'RMSProp'),
             PosteriorBNNSampling('MultitaskGP', hparams_gp, 'GP'),
@@ -466,16 +466,6 @@ def main(_):
             ]
 
         try:
-            favorite_color = {"lion": "yellow", "kitty": "red"}
-
-            pkl.dump(favorite_color, open("test.p", "wb"))
-
-            pkl.dump({'desc': 'All the base models',
-                      'models': [alg.name for alg in algos], 'dataset': data_type,
-                      'hparams': [alg.hparams for alg in algos],
-                      'actions': None, 'rewards': None},
-                     open("/home/mlisicki/project/mlisicki/deep_contextual_bandits/experiment_all_base_methods_{}_{}.pkl".format(str(token),data_type), "wb"))
-
             # Run contextual bandit problem
             t_init = time.time()
             results = run_contextual_bandit(context_dim, num_actions, dataset, algos)
@@ -483,7 +473,7 @@ def main(_):
 
             pkl.dump({'desc': 'All the base models',
                       'models': [alg.name for alg in algos], 'dataset': data_type,
-                      'hparams': [alg.hparams for alg in algos],
+                      'hparams': [str(alg.hparams) for alg in algos],
                       'actions': h_actions, 'rewards': h_rewards},
                      open("/home/mlisicki/project/mlisicki/deep_contextual_bandits/experiment_all_base_methods_{}_{}.pkl".format(str(token),data_type), "wb"))
             # Display results
