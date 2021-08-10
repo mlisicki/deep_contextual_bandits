@@ -228,7 +228,7 @@ def display_results(algos, opt_rewards, opt_actions, h_rewards, t_init, name):
 
 def main(_):
     # Problem parameters
-    num_contexts = 200
+    num_contexts = 200000
     token = np.random.randint(9999)
 
     # Data type in {linear, sparse_linear, mushroom, financial, jester,
@@ -448,8 +448,8 @@ def main(_):
 
 
         algos = [
-#            PosteriorBNNSampling('BBAlphaDiv', hparams_alpha_div, 'AlphaDiv'),
-#            PosteriorBNNSampling('BBB', hparams_bbb, 'Variational'),
+            PosteriorBNNSampling('BBAlphaDiv', hparams_alpha_div, 'AlphaDiv'),
+            PosteriorBNNSampling('BBB', hparams_bbb, 'Variational'),
             BootstrappedBNNSampling('BootRMS', hparams_bootrms),
             PosteriorBNNSampling('Dropout', hparams_dropout, 'RMSProp'),
             PosteriorBNNSampling('MultitaskGP', hparams_gp, 'GP'),
@@ -471,7 +471,7 @@ def main(_):
             results = run_contextual_bandit(context_dim, num_actions, dataset, algos)
             h_actions, h_rewards = results
 
-            pkl.dump({'desc': 'Train neural linear with their hyperparameters on all datasets, using all data samples',
+            pkl.dump({'desc': 'All the base models',
                       'models': [alg.name for alg in algos], 'dataset': data_type,
                       'hparams': [alg.hparams for alg in algos],
                       'actions': h_actions, 'rewards': h_rewards},
