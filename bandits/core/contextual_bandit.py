@@ -55,6 +55,8 @@ def run_contextual_bandit(context_dim, num_actions, dataset, algos):
     actions = [a.action(context) for a in algos]
     rewards = [cmab.reward(i, action) for action in actions]
 
+    print("CMAB step {}/{}".format(i,num_contexts))
+
     for j, a in enumerate(algos):
       a.update(context, actions[j], rewards[j])
 
