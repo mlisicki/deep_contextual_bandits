@@ -466,6 +466,16 @@ def main(_):
             ]
 
         try:
+            favorite_color = {"lion": "yellow", "kitty": "red"}
+
+            pkl.dump(favorite_color, open("test.p", "wb"))
+
+            pkl.dump({'desc': 'All the base models',
+                      'models': [alg.name for alg in algos], 'dataset': data_type,
+                      'hparams': [alg.hparams for alg in algos],
+                      'actions': None, 'rewards': None},
+                     open("/home/mlisicki/project/mlisicki/deep_contextual_bandits/experiment_all_base_methods_{}_{}.pkl".format(str(token),data_type), "wb"))
+
             # Run contextual bandit problem
             t_init = time.time()
             results = run_contextual_bandit(context_dim, num_actions, dataset, algos)
