@@ -48,6 +48,8 @@ def run_contextual_bandit(context_dim, num_actions, dataset, algos):
 
   h_actions = np.empty((0, len(algos)), float)
   h_rewards = np.empty((0, len(algos)), float)
+  optimal_actions = []
+  optimal_rewards = []
 
   # Run the contextual bandit process
   for i in range(num_contexts):
@@ -60,6 +62,8 @@ def run_contextual_bandit(context_dim, num_actions, dataset, algos):
     for j, a in enumerate(algos):
       a.update(context, actions[j], rewards[j])
 
+    optimal_actions += [cmab.optimal(i)]
+    optimal_rewards += [cmab.reward(i, cmab.optimal(i))]
     h_actions = np.vstack((h_actions, np.array(actions)))
     h_rewards = np.vstack((h_rewards, np.array(rewards)))
 
