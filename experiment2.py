@@ -474,7 +474,8 @@ def main(_):
             pkl.dump({'desc': 'All the base models',
                       'models': [alg.name for alg in algos], 'dataset': data_type,
                       'hparams': [str(alg.hparams) for alg in algos],
-                      'actions': h_actions, 'rewards': h_rewards, 'opt_actions': optimal_actions, 'opt_rewards': optimal_rewards},
+                      'actions': h_actions, 'rewards': h_rewards, 'opt_actions': optimal_actions, 'opt_rewards': optimal_rewards,
+                      'opt_actions_data': opt_rewards, 'opt_rewards_data': opt_actions},
                      open("/home/mlisicki/project/mlisicki/deep_contextual_bandits/experiment_all_base_methods_{}_{}.pkl".format(str(token),data_type), "wb"))
             # Display results
             display_results(algos, opt_rewards, opt_actions, h_rewards, t_init, data_type)
