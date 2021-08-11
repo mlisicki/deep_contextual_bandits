@@ -469,12 +469,12 @@ def main(_):
             # Run contextual bandit problem
             t_init = time.time()
             results = run_contextual_bandit(context_dim, num_actions, dataset, algos)
-            h_actions, h_rewards = results
+            h_actions, h_rewards, optimal_actions, optimal_rewards = results
 
             pkl.dump({'desc': 'All the base models',
                       'models': [alg.name for alg in algos], 'dataset': data_type,
                       'hparams': [str(alg.hparams) for alg in algos],
-                      'actions': h_actions, 'rewards': h_rewards},
+                      'actions': h_actions, 'rewards': h_rewards, 'opt_actions' optimal_actions, 'opt_rewards': optimal_rewards},
                      open("/home/mlisicki/project/mlisicki/deep_contextual_bandits/experiment_all_base_methods_{}_{}.pkl".format(str(token),data_type), "wb"))
             # Display results
             display_results(algos, opt_rewards, opt_actions, h_rewards, t_init, data_type)
